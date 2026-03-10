@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register as Principal – School Management Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Principal-specific overrides */
+    .card-header h2  { color: var(--teal-dark); }
+    .form-group input:focus { border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(13,148,136,0.15); }
+    .back-link:hover { color: var(--teal-dark); }
+  </style>
+</head>
+<body class="auth-page">
+
+  <div class="portal-title">🏫 School Management Portal</div>
+
+  <div class="auth-card">
+    <div class="card-header">
+      <span class="icon">🏛️</span>
+      <h2>Principal Registration</h2>
+      <p>Create your principal account to get started</p>
+    </div>
+
+    <form id="regForm" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="Dr. Jane Doe" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="jane@school.edu" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+1 555 0200" autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <label for="experience">Experience (years)</label>
+          <input type="number" id="experience" placeholder="e.g. 15" min="0" max="60" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary-teal btn-full" style="margin-top:6px;">Register as Principal</button>
+      <div id="msg" class="msg"></div>
+    </form>
+
+    <a href="index.html" class="back-link">← Back to Login</a>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('regForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const fullName        = document.getElementById('fullName').value.trim();
+      const email           = document.getElementById('email').value.trim().toLowerCase();
+      const phone           = document.getElementById('phone').value.trim();
+      const experience      = document.getElementById('experience').value.trim();
+      const password        = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!fullName || !email || !phone || !experience || !password || !confirmPassword) {
+        showMsg('msg', 'error', 'Please fill in all fields.'); return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showMsg('msg', 'error', 'Please enter a valid email address.'); return;
+      }
+      if (password.length < 6) {
+        showMsg('msg', 'error', 'Password must be at least 6 characters.'); return;
+      }
+      if (password !== confirmPassword) {
+        showMsg('msg', 'error', 'Passwords do not match.'); return;
+      }
+
+      const users = getUsers();
+      if (users.find(function (u) { return u.email === email; })) {
+        showMsg('msg', 'error', 'An account with this email already exists.'); return;
+      }
+
+      users.push({
+        id:         'P_' + Date.now(),
+        name:       fullName,
+        email:      email,
+        phone:      phone,
+        experience: experience,
+        role:       'principal',
+        password:   password,
+        active:     true,
+        createdAt:  new Date().toISOString()
+      });
+      saveUsers(users);
+
+      showMsg('msg', 'success', '✅ Registration successful. You can now login.');
+      document.getElementById('regForm').reset();
+      setTimeout(function () { location.href = 'index.html'; }, 2500);
+    });
+  </script>
+</body>
+</html>

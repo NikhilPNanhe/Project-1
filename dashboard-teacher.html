@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard – School Management Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="topbar-logo">🏫</span>
+    <div>
+      <div class="topbar-title">School Management Portal</div>
+      <div class="topbar-subtitle">Teacher Dashboard</div>
+    </div>
+  </div>
+  <div class="user-menu">
+    <button class="user-btn" id="userBtn" aria-expanded="false" aria-haspopup="true">
+      <div class="user-avatar" id="topAvatar">T</div>
+      <span id="topName">Teacher</span>
+      <span aria-hidden="true">▾</span>
+    </button>
+    <nav class="dropdown" id="dropdown" role="menu">
+      <a href="#" onclick="showPanel('profile'); closeDropdown(); return false;" role="menuitem">👤 Profile</a>
+      <a href="#" onclick="showPanel('changePassword'); closeDropdown(); return false;" role="menuitem">🔒 Change Password</a>
+      <hr />
+      <a href="#" class="logout" onclick="logout(); return false;" role="menuitem">🚪 Logout</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar" aria-label="Main navigation">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main Menu</div>
+    <button class="nav-item active" id="nav-home" onclick="showPanel('home')"><span class="nav-icon">🏠</span> Dashboard</button>
+    <button class="nav-item" id="nav-homework" onclick="showPanel('homework')"><span class="nav-icon">📤</span> Upload Homework</button>
+    <button class="nav-item" id="nav-attendance" onclick="showPanel('attendance')"><span class="nav-icon">✅</span> Mark Attendance</button>
+    <button class="nav-item" id="nav-schedule" onclick="showPanel('schedule')"><span class="nav-icon">📅</span> Class Schedule</button>
+    <button class="nav-item" id="nav-performance" onclick="showPanel('performance')"><span class="nav-icon">📊</span> Student Performance</button>
+  </div>
+  <div class="sidebar-section" style="margin-top:12px;">
+    <div class="sidebar-label">Account</div>
+    <button class="nav-item" id="nav-profile" onclick="showPanel('profile')"><span class="nav-icon">👤</span> Profile</button>
+    <button class="nav-item" id="nav-changePassword" onclick="showPanel('changePassword')"><span class="nav-icon">🔒</span> Change Password</button>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- HOME -->
+  <section class="panel active" id="panel-home">
+    <div class="page-header">
+      <h1 id="welcomeMsg">Welcome back! 👋</h1>
+      <p>Here's what's happening in your classes today.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon si-blue">📚</div><div class="stat-info"><h3>5</h3><p>Homework Assigned</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-green">✅</div><div class="stat-info"><h3>42</h3><p>Students Present</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-orange">📅</div><div class="stat-info"><h3>6</h3><p>Classes Today</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-purple">📊</div><div class="stat-info"><h3>87%</h3><p>Avg. Performance</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>📢 Announcements</h3></div>
+      <div class="content-card-body">
+        <div class="announcement-item"><h4>Parent-Teacher Meeting</h4><p>Scheduled for next Friday at 10 AM in the school hall.</p><div class="ann-meta">📅 March 10, 2026</div></div>
+        <div class="announcement-item"><h4>Mid-Term Exams</h4><p>Mid-term exams begin on March 20th. Please prepare students accordingly.</p><div class="ann-meta">📅 March 8, 2026</div></div>
+        <div class="announcement-item"><h4>Curriculum Update Meeting</h4><p>Meeting on March 12 at 3 PM in the conference room.</p><div class="ann-meta">📅 March 5, 2026</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD HOMEWORK -->
+  <section class="panel" id="panel-homework">
+    <div class="page-header"><h1>📤 Upload Homework</h1><p>Assign homework to your students.</p></div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>New Homework Assignment</h3></div>
+      <div class="content-card-body">
+        <form id="homeworkForm" onsubmit="submitHomework(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Class</label>
+              <select id="hwClass">
+                <option>Class 9 – A</option><option>Class 9 – B</option>
+                <option>Class 10 – A</option><option>Class 10 – B</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" id="hwSubject" placeholder="e.g. Mathematics" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Assignment Title</label>
+            <input type="text" id="hwTitle" placeholder="e.g. Chapter 5 – Quadratic Equations" />
+          </div>
+          <div class="form-group">
+            <label>Description / Instructions</label>
+            <textarea id="hwDesc" placeholder="Write the homework details here…"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Due Date</label><input type="date" id="hwDue" /></div>
+            <div class="form-group"><label>Max Marks</label><input type="number" id="hwMarks" placeholder="e.g. 20" min="1" /></div>
+          </div>
+          <button type="submit" class="btn btn-primary">📤 Upload Assignment</button>
+          <div id="hwMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="content-card" id="hwListCard" style="display:none;">
+      <div class="content-card-header"><h3>📋 Recent Assignments</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Title</th><th>Class</th><th>Subject</th><th>Due Date</th><th>Marks</th></tr></thead>
+            <tbody id="hwList"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARK ATTENDANCE -->
+  <section class="panel" id="panel-attendance">
+    <div class="page-header"><h1>✅ Mark Attendance</h1><p>Record student attendance for your classes.</p></div>
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>Today's Attendance</h3>
+        <span class="meta" id="attDate"></span>
+      </div>
+      <div class="content-card-body">
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="form-group"><label>Select Class</label>
+            <select id="attClass">
+              <option>Class 9 – A</option><option>Class 9 – B</option><option>Class 10 – A</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Date</label><input type="date" id="attDateInput" /></div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Student Name</th><th>Status</th></tr></thead>
+            <tbody id="attTable"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary" style="margin-top:18px;" onclick="saveAttendance()">💾 Save Attendance</button>
+        <div id="attMsg" class="msg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLASS SCHEDULE -->
+  <section class="panel" id="panel-schedule">
+    <div class="page-header"><h1>📅 Class Schedule</h1><p>Your weekly timetable.</p></div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Weekly Timetable</h3></div>
+      <div class="content-card-body">
+        <div class="schedule-grid">
+          <div class="schedule-day">
+            <h4>Monday</h4>
+            <div class="schedule-slot"><div class="time">08:00–09:00</div><div class="subj">Mathematics</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">10:00–11:00</div><div class="subj">Mathematics</div><div class="class">Class 10B</div></div>
+            <div class="schedule-slot"><div class="time">13:00–14:00</div><div class="subj">Extra Class</div><div class="class">Class 9A</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Tuesday</h4>
+            <div class="schedule-slot"><div class="time">09:00–10:00</div><div class="subj">Mathematics</div><div class="class">Class 10A</div></div>
+            <div class="schedule-slot"><div class="time">11:00–12:00</div><div class="subj">Mathematics</div><div class="class">Class 9B</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Wednesday</h4>
+            <div class="schedule-slot"><div class="time">08:00–09:00</div><div class="subj">Mathematics</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">14:00–15:00</div><div class="subj">Lab Session</div><div class="class">Class 10A</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Thursday</h4>
+            <div class="schedule-slot"><div class="time">10:00–11:00</div><div class="subj">Mathematics</div><div class="class">Class 9B</div></div>
+            <div class="schedule-slot"><div class="time">13:00–14:00</div><div class="subj">Mathematics</div><div class="class">Class 10B</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Friday</h4>
+            <div class="schedule-slot"><div class="time">09:00–10:00</div><div class="subj">Mathematics</div><div class="class">Class 10A</div></div>
+            <div class="schedule-slot"><div class="time">11:00–12:00</div><div class="subj">Quiz / Test</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">14:00–15:00</div><div class="subj">Review</div><div class="class">Class 10B</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDENT PERFORMANCE -->
+  <section class="panel" id="panel-performance">
+    <div class="page-header"><h1>📊 Student Performance</h1><p>Track and analyse your students' academic progress.</p></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon si-blue">🏆</div><div class="stat-info"><h3>87%</h3><p>Class Average</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-green">⭐</div><div class="stat-info"><h3>12</h3><p>Top Performers</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-orange">⚠️</div><div class="stat-info"><h3>4</h3><p>Need Attention</p></div></div>
+      <div class="stat-card"><div class="stat-icon si-purple">📝</div><div class="stat-info"><h3>95%</h3><p>Submission Rate</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Subject Performance Overview</h3></div>
+      <div class="content-card-body">
+        <div class="perf-row"><div class="perf-label">Overall Avg</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:87%"></div></div><div class="perf-val">87%</div></div>
+        <div class="perf-row"><div class="perf-label">Test 1</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:78%"></div></div><div class="perf-val">78%</div></div>
+        <div class="perf-row"><div class="perf-label">Test 2</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:82%"></div></div><div class="perf-val">82%</div></div>
+        <div class="perf-row"><div class="perf-label">Quiz Avg</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:91%"></div></div><div class="perf-val">91%</div></div>
+        <div class="perf-row"><div class="perf-label">Homework</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:95%"></div></div><div class="perf-val">95%</div></div>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Top Students – Class 9A</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Rank</th><th>Student</th><th>Score</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 1</td><td>Alice Johnson</td><td>97%</td><td><span class="status-badge badge-green">A+</span></td></tr>
+              <tr><td>🥈 2</td><td>Bob Smith</td><td>94%</td><td><span class="status-badge badge-green">A</span></td></tr>
+              <tr><td>🥉 3</td><td>Carol White</td><td>91%</td><td><span class="status-badge badge-green">A</span></td></tr>
+              <tr><td>4</td><td>David Brown</td><td>88%</td><td><span class="status-badge badge-orange">B+</span></td></tr>
+              <tr><td>5</td><td>Eve Davis</td><td>85%</td><td><span class="status-badge badge-orange">B</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="panel" id="panel-profile">
+    <div class="page-header"><h1>👤 My Profile</h1><p>View and edit your profile information.</p></div>
+    <div class="content-card">
+      <div class="profile-top">
+        <div class="profile-avatar" id="profileAvatar">T</div>
+        <div class="profile-meta">
+          <h2 id="profileName">Teacher Name</h2>
+          <p id="profileEmail">teacher@school.edu</p>
+          <span class="badge">📚 Teacher</span>
+        </div>
+      </div>
+
+      <!-- View Mode -->
+      <div class="content-card-body" id="profileViewMode">
+        <div class="info-grid">
+          <div class="info-item"><label>Full Name</label><p id="pName">–</p></div>
+          <div class="info-item"><label>Email</label><p id="pEmail">–</p></div>
+          <div class="info-item"><label>Phone</label><p id="pPhone">–</p></div>
+          <div class="info-item"><label>Subject</label><p id="pSubject">–</p></div>
+          <div class="info-item"><label>Role</label><p id="pRole">Teacher</p></div>
+          <div class="info-item"><label>Member Since</label><p id="pDate">–</p></div>
+        </div>
+        <div style="margin-top:24px;">
+          <button class="btn btn-primary" onclick="toggleEditProfile()">✏️ Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div class="content-card-body" id="profileEditMode" style="display:none;">
+        <form id="editProfileForm" onsubmit="saveProfile(event)">
+          <div class="form-row">
+            <div class="form-group"><label>Full Name</label><input type="text" id="editName" placeholder="Your full name" /></div>
+            <div class="form-group"><label>Email (read-only)</label><input type="email" id="editEmail" disabled /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone Number</label><input type="tel" id="editPhone" placeholder="Your phone number" /></div>
+            <div class="form-group"><label>Subject</label><input type="text" id="editSubject" placeholder="Your subject" /></div>
+          </div>
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleEditProfile()">Cancel</button>
+          </div>
+          <div id="profileMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHANGE PASSWORD -->
+  <section class="panel" id="panel-changePassword">
+    <div class="page-header"><h1>🔒 Change Password</h1><p>Update your account password.</p></div>
+    <div class="content-card" style="max-width:480px;">
+      <div class="content-card-header"><h3>Update Password</h3></div>
+      <div class="content-card-body">
+        <form id="pwForm" onsubmit="changePassword(event)">
+          <div class="form-group"><label>Current Password</label><input type="password" id="currPw" placeholder="Enter current password" autocomplete="current-password" /></div>
+          <div class="form-group"><label>New Password</label><input type="password" id="newPw" placeholder="Min. 6 characters" autocomplete="new-password" /></div>
+          <div class="form-group"><label>Confirm New Password</label><input type="password" id="confPw" placeholder="Re-enter new password" autocomplete="new-password" /></div>
+          <button type="submit" class="btn btn-primary">🔐 Update Password</button>
+          <div id="pwMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+<script>
+  /* ── Boot ── */
+  var currentUser = requireRole('teacher');
+
+  var STUDENTS = ['Alice Johnson','Bob Smith','Carol White','David Brown','Eve Davis',
+    'Frank Wilson','Grace Lee','Henry Clark','Iris Kim','Jake Turner'];
+
+  function init() {
+    document.getElementById('welcomeMsg').textContent = 'Welcome back, ' + currentUser.name + '! 👋';
+    loadProfileUI(currentUser);
+    buildAttTable();
+    document.getElementById('attDateInput').value = new Date().toISOString().split('T')[0];
+    document.getElementById('attDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    loadHomeworkList();
+  }
+
+  initUserMenu();
+  init();
+
+  /* ── Navigation ── */
+  window.showPanel = function (name) {
+    var p = function (n) { return document.getElementById('panel-' + n); };
+    document.querySelectorAll('.panel').forEach(function (el) { el.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function (el) { el.classList.remove('active'); });
+    var panel = p(name); if (panel) panel.classList.add('active');
+    var nav = document.getElementById('nav-' + name); if (nav) nav.classList.add('active');
+  };
+
+  /* ── Profile wiring ── */
+  window.saveProfile = function (e) {
+    saveProfile(e, function (u) { currentUser = u; });
+  };
+
+  /* ── Homework ── */
+  var homeworks = [];
+  function loadHomeworkList() {
+    homeworks = JSON.parse(localStorage.getItem('sms_hw_' + currentUser.id) || '[]');
+    renderHwList();
+  }
+
+  window.submitHomework = function (e) {
+    e.preventDefault();
+    var title   = document.getElementById('hwTitle').value.trim();
+    var subject = document.getElementById('hwSubject').value.trim();
+    var cls     = document.getElementById('hwClass').value;
+    var desc    = document.getElementById('hwDesc').value.trim();
+    var due     = document.getElementById('hwDue').value;
+    var marks   = document.getElementById('hwMarks').value;
+
+    if (!title || !subject || !due) {
+      showMsg('hwMsg', 'error', 'Title, subject and due date are required.'); return;
+    }
+    homeworks.push({ title: title, subject: subject, cls: cls, desc: desc, due: due, marks: marks, createdAt: new Date().toISOString() });
+    localStorage.setItem('sms_hw_' + currentUser.id, JSON.stringify(homeworks));
+    showMsg('hwMsg', 'success', '✅ Assignment uploaded successfully.', 2500);
+    document.getElementById('homeworkForm').reset();
+    renderHwList();
+  };
+
+  function renderHwList() {
+    var card = document.getElementById('hwListCard');
+    var tbody = document.getElementById('hwList');
+    if (!homeworks.length) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    tbody.innerHTML = homeworks.slice().reverse().map(function (h) {
+      return '<tr><td>' + h.title + '</td><td>' + (h.cls || '–') + '</td><td>' + h.subject + '</td><td>' + h.due + '</td><td>' + (h.marks || '–') + '</td></tr>';
+    }).join('');
+  }
+
+  /* ── Attendance ── */
+  function buildAttTable() {
+    document.getElementById('attTable').innerHTML = STUDENTS.map(function (s, i) {
+      return '<tr><td>' + (i+1) + '</td><td>' + s + '</td><td>' +
+        '<select style="padding:6px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-family:inherit;font-size:0.85rem;">' +
+        '<option value="present">✅ Present</option>' +
+        '<option value="absent">❌ Absent</option>' +
+        '<option value="late">⏰ Late</option>' +
+        '</select></td></tr>';
+    }).join('');
+  }
+
+  window.saveAttendance = function () {
+    showMsg('attMsg', 'success', '✅ Attendance saved successfully.', 2500);
+  };
+</script>
+</body>
+</html>
