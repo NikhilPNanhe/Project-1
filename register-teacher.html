@@ -7,121 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 16px;
-      background:
-        linear-gradient(rgba(10,30,60,0.65), rgba(10,30,60,0.65)),
-        url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80') center/cover no-repeat fixed;
-    }
-
-    .portal-title {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #fff;
-      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-align: center;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      padding: 44px 40px 36px;
-      width: 100%;
-      max-width: 480px;
-      margin-top: 30px;
-    }
-
-    .card-header { text-align: center; margin-bottom: 28px; }
-    .card-header .icon { font-size: 2.4rem; margin-bottom: 6px; }
-    .card-header h2 { font-size: 1.45rem; font-weight: 700; color: #1a237e; }
-    .card-header p { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-group label {
-      display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 6px;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1.5px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 0.93rem;
-      font-family: inherit;
-      color: #111827;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-      background: #fff;
-    }
-    .form-group input:focus, .form-group select:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #1a237e 0%, #3b82f6 100%);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      margin-top: 6px;
-    }
-    .btn-primary:hover { opacity: 0.92; }
-    .btn-primary:active { transform: scale(0.98); }
-
-    .msg { margin-top: 14px; text-align: center; font-size: 0.86rem; border-radius: 8px; padding: 10px 14px; display: none; }
-    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
-    .msg.success { background: #dcfce7; color: #15803d; display: block; }
-
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 18px;
-      font-size: 0.86rem;
-      color: #6b7280;
-      text-decoration: none;
-    }
-    .back-link:hover { color: #1a237e; text-decoration: underline; }
-
-    @media (max-width: 520px) {
-      .card { padding: 28px 18px 24px; margin-top: 50px; }
-      .form-row { grid-template-columns: 1fr; gap: 0; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="auth-page">
+
   <div class="portal-title">🏫 School Management Portal</div>
 
-  <div class="card">
+  <div class="auth-card">
     <div class="card-header">
-      <div class="icon">📚</div>
+      <span class="icon">📚</span>
       <h2>Teacher Registration</h2>
       <p>Create your teacher account to get started</p>
     </div>
@@ -130,18 +24,18 @@
       <div class="form-row">
         <div class="form-group">
           <label for="fullName">Full Name</label>
-          <input type="text" id="fullName" placeholder="John Smith" />
+          <input type="text" id="fullName" placeholder="John Smith" autocomplete="name" />
         </div>
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="john@school.edu" />
+          <input type="email" id="email" placeholder="john@school.edu" autocomplete="email" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" placeholder="+1 555 0100" />
+          <input type="tel" id="phone" placeholder="+1 555 0100" autocomplete="tel" />
         </div>
         <div class="form-group">
           <label for="subject">Subject</label>
@@ -152,27 +46,25 @@
       <div class="form-row">
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Min. 6 characters" />
+          <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password" />
         </div>
         <div class="form-group">
           <label for="confirmPassword">Confirm Password</label>
-          <input type="password" id="confirmPassword" placeholder="Re-enter password" />
+          <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" />
         </div>
       </div>
 
-      <button type="submit" class="btn-primary">Register as Teacher</button>
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:6px;">Register as Teacher</button>
       <div id="msg" class="msg"></div>
     </form>
 
     <a href="index.html" class="back-link">← Back to Login</a>
   </div>
 
+  <script src="app.js"></script>
   <script>
     document.getElementById('regForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      const msgEl = document.getElementById('msg');
-      msgEl.className = 'msg';
-      msgEl.textContent = '';
 
       const fullName        = document.getElementById('fullName').value.trim();
       const email           = document.getElementById('email').value.trim().toLowerCase();
@@ -182,52 +74,39 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (!fullName || !email || !phone || !subject || !password || !confirmPassword) {
-        msgEl.className = 'msg error';
-        msgEl.textContent = 'Please fill in all fields.';
-        return;
+        showMsg('msg', 'error', 'Please fill in all fields.'); return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        msgEl.className = 'msg error';
-        msgEl.textContent = 'Please enter a valid email address.';
-        return;
+        showMsg('msg', 'error', 'Please enter a valid email address.'); return;
       }
       if (password.length < 6) {
-        msgEl.className = 'msg error';
-        msgEl.textContent = 'Password must be at least 6 characters.';
-        return;
+        showMsg('msg', 'error', 'Password must be at least 6 characters.'); return;
       }
       if (password !== confirmPassword) {
-        msgEl.className = 'msg error';
-        msgEl.textContent = 'Passwords do not match.';
-        return;
+        showMsg('msg', 'error', 'Passwords do not match.'); return;
       }
 
-      const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
-      if (users.find(u => u.email === email)) {
-        msgEl.className = 'msg error';
-        msgEl.textContent = 'An account with this email already exists.';
-        return;
+      const users = getUsers();
+      if (users.find(function (u) { return u.email === email; })) {
+        showMsg('msg', 'error', 'An account with this email already exists.'); return;
       }
 
-      const newUser = {
-        id:      'T_' + Date.now(),
-        name:    fullName,
-        email:   email,
-        phone:   phone,
-        subject: subject,
-        role:    'teacher',
-        password: password,
-        active:  true,
+      users.push({
+        id:        'T_' + Date.now(),
+        name:      fullName,
+        email:     email,
+        phone:     phone,
+        subject:   subject,
+        role:      'teacher',
+        password:  password,
+        active:    true,
         createdAt: new Date().toISOString()
-      };
-      users.push(newUser);
-      localStorage.setItem('sms_users', JSON.stringify(users));
+      });
+      saveUsers(users);
 
-      msgEl.className = 'msg success';
-      msgEl.textContent = '✅ Registration successful. You can now login.';
+      showMsg('msg', 'success', '✅ Registration successful. You can now login.');
       document.getElementById('regForm').reset();
-
-      setTimeout(() => { location.href = 'index.html'; }, 2500);
+      setTimeout(function () { location.href = 'index.html'; }, 2500);
     });
   </script>
 </body>
