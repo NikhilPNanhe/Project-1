@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard – School Management Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a237e;
+      --primary-light: #3b82f6;
+      --accent: #e8eaf6;
+      --sidebar-w: 240px;
+      --topbar-h: 64px;
+    }
+
+    body { font-family: 'Poppins', sans-serif; background: #f0f4f8; color: #1f2937; }
+
+    /* ── Topbar ─────────────────────────────── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { font-size: 1.5rem; }
+    .topbar-title { color: #fff; font-size: 1.1rem; font-weight: 700; }
+    .topbar-subtitle { color: rgba(255,255,255,0.75); font-size: 0.78rem; }
+
+    .user-menu { position: relative; }
+    .user-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.15); border: none; border-radius: 30px;
+      padding: 8px 16px; cursor: pointer; color: #fff; font-family: inherit;
+      font-size: 0.9rem; font-weight: 500; transition: background 0.2s;
+    }
+    .user-btn:hover { background: rgba(255,255,255,0.25); }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.3); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem; font-weight: 700; color: #fff;
+    }
+
+    .dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0;
+      background: #fff; border-radius: 12px; min-width: 190px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18); overflow: hidden;
+      display: none; z-index: 200;
+    }
+    .dropdown.open { display: block; }
+    .dropdown a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; text-decoration: none; color: #374151;
+      font-size: 0.88rem; font-weight: 500; transition: background 0.15s;
+    }
+    .dropdown a:hover { background: #f3f4f6; }
+    .dropdown a.logout { color: #dc2626; }
+    .dropdown hr { border: none; border-top: 1px solid #e5e7eb; }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar {
+      position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+      width: var(--sidebar-w); background: #fff;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06); overflow-y: auto; z-index: 50;
+    }
+    .sidebar-section { padding: 20px 0 0; }
+    .sidebar-label {
+      padding: 6px 20px; font-size: 0.72rem; font-weight: 700;
+      color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; cursor: pointer; border: none; background: none;
+      font-family: inherit; font-size: 0.9rem; font-weight: 500;
+      color: #4b5563; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--accent); color: var(--primary); }
+    .nav-item.active {
+      background: var(--accent); color: var(--primary);
+      border-left-color: var(--primary); font-weight: 600;
+    }
+    .nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    /* ── Main Content ─────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      margin-top: var(--topbar-h);
+      padding: 32px;
+      min-height: calc(100vh - var(--topbar-h));
+    }
+
+    /* ── Section panels ──────────────────────── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .page-header p  { color: #6b7280; font-size: 0.88rem; margin-top: 4px; }
+
+    /* Summary cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 18px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 22px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon { font-size: 2rem; width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon.blue   { background: #dbeafe; }
+    .stat-icon.green  { background: #dcfce7; }
+    .stat-icon.orange { background: #ffedd5; }
+    .stat-icon.purple { background: #ede9fe; }
+    .stat-info h3 { font-size: 1.5rem; font-weight: 700; color: #111827; }
+    .stat-info p  { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+
+    /* Content card */
+    .content-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .content-card-header {
+      padding: 18px 24px; border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .content-card-header h3 { font-size: 1rem; font-weight: 700; color: #111827; }
+    .content-card-body { padding: 24px; }
+
+    /* Form styles */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 15px;
+      border: 1.5px solid #d1d5db; border-radius: 10px;
+      font-size: 0.93rem; font-family: inherit; color: #111827;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+      background: #fff;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .form-group input:disabled { background: #f9fafb; color: #6b7280; }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn { padding: 11px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.2s, transform 0.1s; border: none; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: #f3f4f6; color: #374151; border: 1.5px solid #d1d5db; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-sm { padding: 8px 16px; font-size: 0.82rem; }
+
+    .msg { margin-top: 12px; font-size: 0.86rem; border-radius: 8px; padding: 10px 14px; display: none; }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+
+    /* Profile card */
+    .profile-top {
+      display: flex; align-items: center; gap: 24px;
+      padding: 28px 24px; border-bottom: 1px solid #f3f4f6;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: #fff; font-weight: 700; flex-shrink: 0;
+    }
+    .profile-meta h2 { font-size: 1.2rem; font-weight: 700; }
+    .profile-meta p  { font-size: 0.85rem; color: #6b7280; margin-top: 2px; }
+    .badge {
+      display: inline-block; padding: 3px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin-top: 6px;
+      background: var(--accent); color: var(--primary);
+    }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .info-item label { display: block; font-size: 0.78rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .info-item p { font-size: 0.95rem; color: #111827; font-weight: 500; }
+
+    /* Attendance table */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 14px 16px; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .status-badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+    }
+    .status-present { background: #dcfce7; color: #15803d; }
+    .status-absent  { background: #fee2e2; color: #b91c1c; }
+    .status-late    { background: #fef9c3; color: #b45309; }
+
+    /* Schedule */
+    .schedule-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
+    .schedule-day { background: var(--accent); border-radius: 12px; padding: 14px; }
+    .schedule-day h4 { font-size: 0.82rem; font-weight: 700; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
+    .schedule-slot { background: #fff; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .schedule-slot .time { font-size: 0.72rem; color: #9ca3af; font-weight: 600; }
+    .schedule-slot .subj { font-size: 0.85rem; color: #111827; font-weight: 600; margin-top: 2px; }
+    .schedule-slot .class { font-size: 0.78rem; color: #6b7280; }
+
+    /* Performance chart bars */
+    .perf-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .perf-label { width: 120px; font-size: 0.85rem; font-weight: 500; color: #374151; }
+    .perf-bar-wrap { flex: 1; background: #e5e7eb; border-radius: 20px; height: 10px; overflow: hidden; }
+    .perf-bar { height: 10px; border-radius: 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); }
+    .perf-val { width: 36px; text-align: right; font-size: 0.85rem; font-weight: 600; color: #111827; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .info-grid { grid-template-columns: 1fr; }
+      .schedule-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🏫</div>
+    <div>
+      <div class="topbar-title">School Management Portal</div>
+      <div class="topbar-subtitle">Teacher Dashboard</div>
+    </div>
+  </div>
+  <div class="user-menu">
+    <button class="user-btn" id="userBtn" aria-expanded="false" aria-haspopup="true">
+      <div class="user-avatar" id="topAvatar">T</div>
+      <span id="topName">Teacher</span>
+      <span>▾</span>
+    </button>
+    <div class="dropdown" id="dropdown" role="menu">
+      <a href="#" onclick="showPanel('profile'); closeDropdown(); return false;" role="menuitem">👤 Profile</a>
+      <a href="#" onclick="showPanel('changePassword'); closeDropdown(); return false;" role="menuitem">🔒 Change Password</a>
+      <hr />
+      <a href="#" class="logout" onclick="logout(); return false;" role="menuitem">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main Menu</div>
+    <button class="nav-item active" id="nav-home" onclick="showPanel('home')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </button>
+    <button class="nav-item" id="nav-homework" onclick="showPanel('homework')">
+      <span class="nav-icon">📤</span> Upload Homework
+    </button>
+    <button class="nav-item" id="nav-attendance" onclick="showPanel('attendance')">
+      <span class="nav-icon">✅</span> Mark Attendance
+    </button>
+    <button class="nav-item" id="nav-schedule" onclick="showPanel('schedule')">
+      <span class="nav-icon">📅</span> Class Schedule
+    </button>
+    <button class="nav-item" id="nav-performance" onclick="showPanel('performance')">
+      <span class="nav-icon">📊</span> Student Performance
+    </button>
+  </div>
+  <div class="sidebar-section" style="margin-top: 12px;">
+    <div class="sidebar-label">Account</div>
+    <button class="nav-item" id="nav-profile" onclick="showPanel('profile')">
+      <span class="nav-icon">👤</span> Profile
+    </button>
+    <button class="nav-item" id="nav-changePassword" onclick="showPanel('changePassword')">
+      <span class="nav-icon">🔒</span> Change Password
+    </button>
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="main">
+
+  <!-- HOME / OVERVIEW -->
+  <div class="panel active" id="panel-home">
+    <div class="page-header">
+      <h1 id="welcomeMsg">Welcome back! 👋</h1>
+      <p>Here's what's happening in your classes today.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">📚</div>
+        <div class="stat-info"><h3>5</h3><p>Homework Assigned</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info"><h3>42</h3><p>Students Present</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">📅</div>
+        <div class="stat-info"><h3>6</h3><p>Classes Today</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">📊</div>
+        <div class="stat-info"><h3>87%</h3><p>Avg. Performance</p></div>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>📢 Recent Announcements</h3>
+      </div>
+      <div class="content-card-body">
+        <p style="color:#6b7280;font-size:0.9rem;margin-bottom:12px;">📌 <strong>Parent-Teacher Meeting</strong> scheduled for next Friday at 10 AM.</p>
+        <p style="color:#6b7280;font-size:0.9rem;margin-bottom:12px;">📌 <strong>Mid-term exams</strong> begin on March 20th. Please prepare students accordingly.</p>
+        <p style="color:#6b7280;font-size:0.9rem;">📌 <strong>Curriculum update</strong> meeting on March 12 at 3 PM in the conference room.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD HOMEWORK -->
+  <div class="panel" id="panel-homework">
+    <div class="page-header">
+      <h1>📤 Upload Homework</h1>
+      <p>Assign homework to your students.</p>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>New Homework Assignment</h3></div>
+      <div class="content-card-body">
+        <form id="homeworkForm" onsubmit="submitHomework(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Class</label>
+              <select>
+                <option>Class 9 – A</option>
+                <option>Class 9 – B</option>
+                <option>Class 10 – A</option>
+                <option>Class 10 – B</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" id="hwSubject" placeholder="e.g. Mathematics" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Assignment Title</label>
+            <input type="text" id="hwTitle" placeholder="e.g. Chapter 5 – Quadratic Equations" />
+          </div>
+          <div class="form-group">
+            <label>Description / Instructions</label>
+            <textarea id="hwDesc" placeholder="Write the homework details here…"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Due Date</label>
+              <input type="date" id="hwDue" />
+            </div>
+            <div class="form-group">
+              <label>Marks</label>
+              <input type="number" id="hwMarks" placeholder="e.g. 20" min="1" />
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">📤 Upload Assignment</button>
+          <div id="hwMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="content-card" id="hwListCard" style="display:none;">
+      <div class="content-card-header"><h3>📋 Recent Assignments</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Title</th><th>Subject</th><th>Due Date</th><th>Marks</th></tr></thead>
+            <tbody id="hwList"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARK ATTENDANCE -->
+  <div class="panel" id="panel-attendance">
+    <div class="page-header">
+      <h1>✅ Mark Attendance</h1>
+      <p>Record student attendance for your classes.</p>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>Today's Attendance</h3>
+        <span style="font-size:0.85rem;color:#6b7280;" id="attDate"></span>
+      </div>
+      <div class="content-card-body">
+        <div class="form-row" style="margin-bottom:18px;">
+          <div class="form-group">
+            <label>Select Class</label>
+            <select id="attClass">
+              <option>Class 9 – A</option>
+              <option>Class 9 – B</option>
+              <option>Class 10 – A</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="attDateInput" />
+          </div>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Student Name</th><th>Status</th></tr></thead>
+            <tbody id="attTable"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-primary" style="margin-top:18px;" onclick="saveAttendance()">💾 Save Attendance</button>
+        <div id="attMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS SCHEDULE -->
+  <div class="panel" id="panel-schedule">
+    <div class="page-header">
+      <h1>📅 Class Schedule</h1>
+      <p>Your weekly timetable.</p>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Weekly Timetable</h3></div>
+      <div class="content-card-body">
+        <div class="schedule-grid">
+          <div class="schedule-day">
+            <h4>Monday</h4>
+            <div class="schedule-slot"><div class="time">8:00 – 9:00</div><div class="subj">Mathematics</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">10:00 – 11:00</div><div class="subj">Mathematics</div><div class="class">Class 10B</div></div>
+            <div class="schedule-slot"><div class="time">13:00 – 14:00</div><div class="subj">Extra Class</div><div class="class">Class 9A</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Tuesday</h4>
+            <div class="schedule-slot"><div class="time">9:00 – 10:00</div><div class="subj">Mathematics</div><div class="class">Class 10A</div></div>
+            <div class="schedule-slot"><div class="time">11:00 – 12:00</div><div class="subj">Mathematics</div><div class="class">Class 9B</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Wednesday</h4>
+            <div class="schedule-slot"><div class="time">8:00 – 9:00</div><div class="subj">Mathematics</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">14:00 – 15:00</div><div class="subj">Lab Session</div><div class="class">Class 10A</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Thursday</h4>
+            <div class="schedule-slot"><div class="time">10:00 – 11:00</div><div class="subj">Mathematics</div><div class="class">Class 9B</div></div>
+            <div class="schedule-slot"><div class="time">13:00 – 14:00</div><div class="subj">Mathematics</div><div class="class">Class 10B</div></div>
+          </div>
+          <div class="schedule-day">
+            <h4>Friday</h4>
+            <div class="schedule-slot"><div class="time">9:00 – 10:00</div><div class="subj">Mathematics</div><div class="class">Class 10A</div></div>
+            <div class="schedule-slot"><div class="time">11:00 – 12:00</div><div class="subj">Quiz / Test</div><div class="class">Class 9A</div></div>
+            <div class="schedule-slot"><div class="time">14:00 – 15:00</div><div class="subj">Review</div><div class="class">Class 10B</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT PERFORMANCE -->
+  <div class="panel" id="panel-performance">
+    <div class="page-header">
+      <h1>📊 Student Performance</h1>
+      <p>Track and analyse your students' academic progress.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon blue">🏆</div><div class="stat-info"><h3>87%</h3><p>Class Average</p></div></div>
+      <div class="stat-card"><div class="stat-icon green">⭐</div><div class="stat-info"><h3>12</h3><p>Top Performers</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">⚠️</div><div class="stat-info"><h3>4</h3><p>Need Attention</p></div></div>
+      <div class="stat-card"><div class="stat-icon purple">📝</div><div class="stat-info"><h3>95%</h3><p>Submission Rate</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Subject Performance Overview</h3></div>
+      <div class="content-card-body">
+        <div class="perf-row"><div class="perf-label">Mathematics</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:87%"></div></div><div class="perf-val">87%</div></div>
+        <div class="perf-row"><div class="perf-label">Test 1</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:78%"></div></div><div class="perf-val">78%</div></div>
+        <div class="perf-row"><div class="perf-label">Test 2</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:82%"></div></div><div class="perf-val">82%</div></div>
+        <div class="perf-row"><div class="perf-label">Quiz Avg</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:91%"></div></div><div class="perf-val">91%</div></div>
+        <div class="perf-row"><div class="perf-label">Homework</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:95%"></div></div><div class="perf-val">95%</div></div>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Top Students – Class 9A</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Rank</th><th>Student</th><th>Score</th><th>Grade</th></tr></thead>
+            <tbody>
+              <tr><td>🥇 1</td><td>Alice Johnson</td><td>97%</td><td><span class="status-badge status-present">A+</span></td></tr>
+              <tr><td>🥈 2</td><td>Bob Smith</td><td>94%</td><td><span class="status-badge status-present">A</span></td></tr>
+              <tr><td>🥉 3</td><td>Carol White</td><td>91%</td><td><span class="status-badge status-present">A</span></td></tr>
+              <tr><td>4</td><td>David Brown</td><td>88%</td><td><span class="status-badge status-late">B+</span></td></tr>
+              <tr><td>5</td><td>Eve Davis</td><td>85%</td><td><span class="status-badge status-late">B</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="panel" id="panel-profile">
+    <div class="page-header">
+      <h1>👤 My Profile</h1>
+      <p>View and edit your profile information.</p>
+    </div>
+    <div class="content-card">
+      <div class="profile-top">
+        <div class="profile-avatar" id="profileAvatar">T</div>
+        <div class="profile-meta">
+          <h2 id="profileName">Teacher Name</h2>
+          <p id="profileEmail">teacher@school.edu</p>
+          <span class="badge">📚 Teacher</span>
+        </div>
+      </div>
+
+      <!-- View Mode -->
+      <div class="content-card-body" id="profileViewMode">
+        <div class="info-grid" id="profileInfoGrid">
+          <div class="info-item"><label>Full Name</label><p id="pName">–</p></div>
+          <div class="info-item"><label>Email</label><p id="pEmail">–</p></div>
+          <div class="info-item"><label>Phone</label><p id="pPhone">–</p></div>
+          <div class="info-item"><label>Subject</label><p id="pSubject">–</p></div>
+          <div class="info-item"><label>Role</label><p>Teacher</p></div>
+          <div class="info-item"><label>Member Since</label><p id="pDate">–</p></div>
+        </div>
+        <div style="margin-top:24px;">
+          <button class="btn btn-primary" onclick="toggleEditProfile()">✏️ Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div class="content-card-body" id="profileEditMode" style="display:none;">
+        <form id="editProfileForm" onsubmit="saveProfile(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="editName" placeholder="Your full name" />
+            </div>
+            <div class="form-group">
+              <label>Email (read-only)</label>
+              <input type="email" id="editEmail" disabled />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="editPhone" placeholder="Your phone number" />
+            </div>
+            <div class="form-group">
+              <label>Subject</label>
+              <input type="text" id="editSubject" placeholder="Your subject" />
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleEditProfile()">Cancel</button>
+          </div>
+          <div id="profileMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="panel" id="panel-changePassword">
+    <div class="page-header">
+      <h1>🔒 Change Password</h1>
+      <p>Update your account password.</p>
+    </div>
+    <div class="content-card" style="max-width:480px;">
+      <div class="content-card-header"><h3>Update Password</h3></div>
+      <div class="content-card-body">
+        <form id="pwForm" onsubmit="changePassword(event)">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currPw" placeholder="Enter current password" />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPw" placeholder="Min. 6 characters" />
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="confPw" placeholder="Re-enter new password" />
+          </div>
+          <button type="submit" class="btn btn-primary">🔐 Update Password</button>
+          <div id="pwMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  // ── Auth guard ──────────────────────────────
+  let currentUser = null;
+  (function () {
+    const u = localStorage.getItem('sms_current_user');
+    if (!u) { location.href = 'index.html'; return; }
+    currentUser = JSON.parse(u);
+    if (currentUser.role !== 'teacher') { location.href = 'index.html'; }
+    initUI();
+  })();
+
+  function initUI() {
+    document.getElementById('topName').textContent   = currentUser.name.split(' ')[0];
+    document.getElementById('topAvatar').textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('welcomeMsg').textContent = 'Welcome back, ' + currentUser.name + '! 👋';
+    loadProfile();
+    buildAttTable();
+    document.getElementById('attDateInput').value = new Date().toISOString().split('T')[0];
+    document.getElementById('attDate').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    loadHomeworkList();
+  }
+
+  // ── Navigation ──────────────────────────────
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    const navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+  }
+
+  // ── User menu dropdown ──────────────────────
+  document.getElementById('userBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const dd = document.getElementById('dropdown');
+    dd.classList.toggle('open');
+    this.setAttribute('aria-expanded', dd.classList.contains('open'));
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  });
+  function closeDropdown() {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  }
+
+  function logout() {
+    localStorage.removeItem('sms_current_user');
+    location.href = 'index.html';
+  }
+
+  // ── Profile ─────────────────────────────────
+  function loadProfile() {
+    document.getElementById('profileName').textContent  = currentUser.name;
+    document.getElementById('profileEmail').textContent = currentUser.email;
+    document.getElementById('profileAvatar').textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('pName').textContent    = currentUser.name;
+    document.getElementById('pEmail').textContent   = currentUser.email;
+    document.getElementById('pPhone').textContent   = currentUser.phone    || '–';
+    document.getElementById('pSubject').textContent = currentUser.subject  || '–';
+    document.getElementById('pDate').textContent    = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : '–';
+    document.getElementById('editName').value    = currentUser.name;
+    document.getElementById('editEmail').value   = currentUser.email;
+    document.getElementById('editPhone').value   = currentUser.phone   || '';
+    document.getElementById('editSubject').value = currentUser.subject || '';
+  }
+
+  function toggleEditProfile() {
+    const view = document.getElementById('profileViewMode');
+    const edit = document.getElementById('profileEditMode');
+    const isEdit = edit.style.display !== 'none';
+    view.style.display = isEdit ? 'block' : 'none';
+    edit.style.display = isEdit ? 'none'  : 'block';
+    document.getElementById('profileMsg').className = 'msg';
+    if (!isEdit) {
+      document.getElementById('editName').value    = currentUser.name;
+      document.getElementById('editPhone').value   = currentUser.phone   || '';
+      document.getElementById('editSubject').value = currentUser.subject || '';
+    }
+  }
+
+  function saveProfile(e) {
+    e.preventDefault();
+    const msgEl = document.getElementById('profileMsg');
+    const name    = document.getElementById('editName').value.trim();
+    const phone   = document.getElementById('editPhone').value.trim();
+    const subject = document.getElementById('editSubject').value.trim();
+
+    if (!name || !phone || !subject) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in all fields.'; return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const idx   = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) {
+      users[idx].name    = name;
+      users[idx].phone   = phone;
+      users[idx].subject = subject;
+      localStorage.setItem('sms_users', JSON.stringify(users));
+      currentUser.name    = name;
+      currentUser.phone   = phone;
+      currentUser.subject = subject;
+      localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+    }
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Profile updated successfully.';
+    loadProfile();
+    setTimeout(toggleEditProfile, 1500);
+  }
+
+  // ── Change Password ──────────────────────────
+  function changePassword(e) {
+    e.preventDefault();
+    const msgEl   = document.getElementById('pwMsg');
+    const currPw  = document.getElementById('currPw').value;
+    const newPw   = document.getElementById('newPw').value;
+    const confPw  = document.getElementById('confPw').value;
+    msgEl.className = 'msg';
+
+    if (!currPw || !newPw || !confPw) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in all fields.'; return;
+    }
+    if (currPw !== currentUser.password) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Current password is incorrect.'; return;
+    }
+    if (newPw.length < 6) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'New password must be at least 6 characters.'; return;
+    }
+    if (newPw !== confPw) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'New passwords do not match.'; return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const idx   = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) { users[idx].password = newPw; localStorage.setItem('sms_users', JSON.stringify(users)); }
+    currentUser.password = newPw;
+    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Password updated successfully.';
+    document.getElementById('pwForm').reset();
+  }
+
+  // ── Homework ────────────────────────────────
+  let homeworks = [];
+  function loadHomeworkList() {
+    homeworks = JSON.parse(localStorage.getItem('sms_homeworks_' + currentUser.id) || '[]');
+    renderHwList();
+  }
+  function submitHomework(e) {
+    e.preventDefault();
+    const msgEl = document.getElementById('hwMsg');
+    const title   = document.getElementById('hwTitle').value.trim();
+    const subject = document.getElementById('hwSubject').value.trim();
+    const desc    = document.getElementById('hwDesc').value.trim();
+    const due     = document.getElementById('hwDue').value;
+    const marks   = document.getElementById('hwMarks').value;
+    if (!title || !subject || !due) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in at least the title, subject and due date.'; return;
+    }
+    homeworks.push({ title, subject, desc, due, marks, createdAt: new Date().toISOString() });
+    localStorage.setItem('sms_homeworks_' + currentUser.id, JSON.stringify(homeworks));
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Assignment uploaded successfully.';
+    document.getElementById('homeworkForm').reset();
+    renderHwList();
+    setTimeout(() => { msgEl.className = 'msg'; }, 2000);
+  }
+  function renderHwList() {
+    if (homeworks.length === 0) { document.getElementById('hwListCard').style.display = 'none'; return; }
+    document.getElementById('hwListCard').style.display = 'block';
+    document.getElementById('hwList').innerHTML = homeworks.slice().reverse().map(h =>
+      `<tr><td>${h.title}</td><td>${h.subject}</td><td>${h.due}</td><td>${h.marks || '–'}</td></tr>`
+    ).join('');
+  }
+
+  // ── Attendance ──────────────────────────────
+  const sampleStudents = ['Alice Johnson','Bob Smith','Carol White','David Brown','Eve Davis',
+    'Frank Wilson','Grace Lee','Henry Clark','Iris Kim','Jake Turner'];
+  function buildAttTable() {
+    document.getElementById('attTable').innerHTML = sampleStudents.map((s, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${s}</td>
+        <td>
+          <select class="att-status" style="padding:6px 10px;border-radius:8px;border:1.5px solid #d1d5db;font-family:inherit;font-size:0.85rem;">
+            <option value="present">✅ Present</option>
+            <option value="absent">❌ Absent</option>
+            <option value="late">⏰ Late</option>
+          </select>
+        </td>
+      </tr>`).join('');
+  }
+  function saveAttendance() {
+    const msgEl = document.getElementById('attMsg');
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Attendance saved successfully.';
+    setTimeout(() => { msgEl.className = 'msg'; }, 2500);
+  }
+</script>
+</body>
+</html>

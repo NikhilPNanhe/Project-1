@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Principal Dashboard – School Management Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #0d6b5e;
+      --primary-light: #0d9488;
+      --accent: #ccfbf1;
+      --sidebar-w: 240px;
+      --topbar-h: 64px;
+    }
+
+    body { font-family: 'Poppins', sans-serif; background: #f0f4f8; color: #1f2937; }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { font-size: 1.5rem; }
+    .topbar-title { color: #fff; font-size: 1.1rem; font-weight: 700; }
+    .topbar-subtitle { color: rgba(255,255,255,0.75); font-size: 0.78rem; }
+
+    .user-menu { position: relative; }
+    .user-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.15); border: none; border-radius: 30px;
+      padding: 8px 16px; cursor: pointer; color: #fff; font-family: inherit;
+      font-size: 0.9rem; font-weight: 500; transition: background 0.2s;
+    }
+    .user-btn:hover { background: rgba(255,255,255,0.25); }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.3); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem; font-weight: 700; color: #fff;
+    }
+    .dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0;
+      background: #fff; border-radius: 12px; min-width: 190px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18); overflow: hidden;
+      display: none; z-index: 200;
+    }
+    .dropdown.open { display: block; }
+    .dropdown a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; text-decoration: none; color: #374151;
+      font-size: 0.88rem; font-weight: 500; transition: background 0.15s;
+    }
+    .dropdown a:hover { background: #f3f4f6; }
+    .dropdown a.logout { color: #dc2626; }
+    .dropdown hr { border: none; border-top: 1px solid #e5e7eb; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+      width: var(--sidebar-w); background: #fff;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06); overflow-y: auto; z-index: 50;
+    }
+    .sidebar-section { padding: 20px 0 0; }
+    .sidebar-label {
+      padding: 6px 20px; font-size: 0.72rem; font-weight: 700;
+      color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; cursor: pointer; border: none; background: none;
+      font-family: inherit; font-size: 0.9rem; font-weight: 500;
+      color: #4b5563; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--accent); color: var(--primary); }
+    .nav-item.active {
+      background: var(--accent); color: var(--primary);
+      border-left-color: var(--primary); font-weight: 600;
+    }
+    .nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-w); margin-top: var(--topbar-h);
+      padding: 32px; min-height: calc(100vh - var(--topbar-h));
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .page-header p  { color: #6b7280; font-size: 0.88rem; margin-top: 4px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 18px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 22px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon { font-size: 2rem; width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon.teal   { background: var(--accent); }
+    .stat-icon.blue   { background: #dbeafe; }
+    .stat-icon.orange { background: #ffedd5; }
+    .stat-icon.purple { background: #ede9fe; }
+    .stat-info h3 { font-size: 1.5rem; font-weight: 700; color: #111827; }
+    .stat-info p  { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+
+    .content-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px;
+    }
+    .content-card-header {
+      padding: 18px 24px; border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .content-card-header h3 { font-size: 1rem; font-weight: 700; color: #111827; }
+    .content-card-body { padding: 24px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 15px; border: 1.5px solid #d1d5db; border-radius: 10px;
+      font-size: 0.93rem; font-family: inherit; color: #111827;
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none; background: #fff;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+    .form-group input:disabled { background: #f9fafb; color: #6b7280; }
+    .form-group textarea { resize: vertical; min-height: 90px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn { padding: 11px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.2s, transform 0.1s; border: none; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: #f3f4f6; color: #374151; border: 1.5px solid #d1d5db; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-sm { padding: 7px 14px; font-size: 0.8rem; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; }
+    .btn-danger:hover { background: #fecaca; }
+
+    .msg { margin-top: 12px; font-size: 0.86rem; border-radius: 8px; padding: 10px 14px; display: none; }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+
+    .profile-top {
+      display: flex; align-items: center; gap: 24px;
+      padding: 28px 24px; border-bottom: 1px solid #f3f4f6;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: #fff; font-weight: 700; flex-shrink: 0;
+    }
+    .profile-meta h2 { font-size: 1.2rem; font-weight: 700; }
+    .profile-meta p  { font-size: 0.85rem; color: #6b7280; margin-top: 2px; }
+    .badge {
+      display: inline-block; padding: 3px 12px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; margin-top: 6px;
+      background: var(--accent); color: var(--primary);
+    }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .info-item label { display: block; font-size: 0.78rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .info-item p { font-size: 0.95rem; color: #111827; font-weight: 500; }
+
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 14px 16px; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-orange { background: #fef9c3; color: #b45309; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+
+    .announcement-item {
+      padding: 16px; border-radius: 12px; background: #f9fafb;
+      margin-bottom: 12px; border-left: 4px solid var(--primary-light);
+    }
+    .announcement-item h4 { font-size: 0.95rem; font-weight: 700; color: #111827; }
+    .announcement-item p  { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
+    .announcement-item .ann-meta { font-size: 0.78rem; color: #9ca3af; margin-top: 6px; }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🏫</div>
+    <div>
+      <div class="topbar-title">School Management Portal</div>
+      <div class="topbar-subtitle">Principal Dashboard</div>
+    </div>
+  </div>
+  <div class="user-menu">
+    <button class="user-btn" id="userBtn" aria-expanded="false" aria-haspopup="true">
+      <div class="user-avatar" id="topAvatar">P</div>
+      <span id="topName">Principal</span>
+      <span>▾</span>
+    </button>
+    <div class="dropdown" id="dropdown" role="menu">
+      <a href="#" onclick="showPanel('profile'); closeDropdown(); return false;" role="menuitem">👤 Profile</a>
+      <a href="#" onclick="showPanel('changePassword'); closeDropdown(); return false;" role="menuitem">🔒 Change Password</a>
+      <hr />
+      <a href="#" class="logout" onclick="logout(); return false;" role="menuitem">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main Menu</div>
+    <button class="nav-item active" id="nav-home" onclick="showPanel('home')">
+      <span class="nav-icon">🏠</span> Dashboard
+    </button>
+    <button class="nav-item" id="nav-reports" onclick="showPanel('reports')">
+      <span class="nav-icon">📋</span> School Reports
+    </button>
+    <button class="nav-item" id="nav-teachers" onclick="showPanel('teachers')">
+      <span class="nav-icon">👩‍🏫</span> Teacher Management
+    </button>
+    <button class="nav-item" id="nav-students" onclick="showPanel('students')">
+      <span class="nav-icon">🎓</span> Student Records
+    </button>
+    <button class="nav-item" id="nav-announcements" onclick="showPanel('announcements')">
+      <span class="nav-icon">📢</span> Announcements
+    </button>
+  </div>
+  <div class="sidebar-section" style="margin-top:12px;">
+    <div class="sidebar-label">Account</div>
+    <button class="nav-item" id="nav-profile" onclick="showPanel('profile')">
+      <span class="nav-icon">👤</span> Profile
+    </button>
+    <button class="nav-item" id="nav-changePassword" onclick="showPanel('changePassword')">
+      <span class="nav-icon">🔒</span> Change Password
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- HOME -->
+  <div class="panel active" id="panel-home">
+    <div class="page-header">
+      <h1 id="welcomeMsg">Welcome back! 👋</h1>
+      <p>School overview and today's summary.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon teal">🎓</div><div class="stat-info"><h3>842</h3><p>Total Students</p></div></div>
+      <div class="stat-card"><div class="stat-icon blue">👩‍🏫</div><div class="stat-info"><h3 id="totalTeachers">0</h3><p>Total Teachers</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">📋</div><div class="stat-info"><h3>24</h3><p>Active Classes</p></div></div>
+      <div class="stat-card"><div class="stat-icon purple">📊</div><div class="stat-info"><h3>91%</h3><p>Attendance Rate</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>📌 Quick Announcements</h3></div>
+      <div class="content-card-body">
+        <div class="announcement-item">
+          <h4>Annual Sports Day</h4>
+          <p>Annual Sports Day is scheduled for March 25th. All teachers must prepare their students.</p>
+          <div class="ann-meta">📅 Posted on March 10, 2026</div>
+        </div>
+        <div class="announcement-item">
+          <h4>Board Meeting</h4>
+          <p>Monthly board meeting on March 15th at 2 PM in the conference hall.</p>
+          <div class="ann-meta">📅 Posted on March 8, 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHOOL REPORTS -->
+  <div class="panel" id="panel-reports">
+    <div class="page-header">
+      <h1>📋 School Reports</h1>
+      <p>Academic and operational reports for the school.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon teal">📈</div><div class="stat-info"><h3>89%</h3><p>Pass Rate</p></div></div>
+      <div class="stat-card"><div class="stat-icon blue">⭐</div><div class="stat-info"><h3>A-</h3><p>Avg. Grade</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🏆</div><div class="stat-info"><h3>15</h3><p>Distinctions</p></div></div>
+      <div class="stat-card"><div class="stat-icon purple">📚</div><div class="stat-info"><h3>95%</h3><p>Curriculum Complete</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Department Performance</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Department</th><th>Pass Rate</th><th>Avg. Score</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Mathematics</td><td>92%</td><td>84.3</td><td><span class="status-badge badge-green">Excellent</span></td></tr>
+              <tr><td>Science</td><td>88%</td><td>81.7</td><td><span class="status-badge badge-green">Good</span></td></tr>
+              <tr><td>English</td><td>95%</td><td>87.2</td><td><span class="status-badge badge-green">Excellent</span></td></tr>
+              <tr><td>History</td><td>79%</td><td>74.6</td><td><span class="status-badge badge-orange">Average</span></td></tr>
+              <tr><td>Physical Education</td><td>98%</td><td>91.0</td><td><span class="status-badge badge-green">Excellent</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Monthly Attendance Trend</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Month</th><th>Students</th><th>Attendance %</th><th>Trend</th></tr></thead>
+            <tbody>
+              <tr><td>January</td><td>842</td><td>93%</td><td>📈</td></tr>
+              <tr><td>February</td><td>842</td><td>91%</td><td>📉</td></tr>
+              <tr><td>March (so far)</td><td>842</td><td>94%</td><td>📈</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER MANAGEMENT -->
+  <div class="panel" id="panel-teachers">
+    <div class="page-header">
+      <h1>👩‍🏫 Teacher Management</h1>
+      <p>Manage and view teachers in the system.</p>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>Registered Teachers</h3>
+        <span id="teacherCount" style="font-size:0.85rem;color:#6b7280;">0 teachers</span>
+      </div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Subject</th><th>Phone</th><th>Status</th></tr></thead>
+            <tbody id="teacherTable">
+              <tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:30px;">No teachers registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STUDENT RECORDS -->
+  <div class="panel" id="panel-students">
+    <div class="page-header">
+      <h1>🎓 Student Records</h1>
+      <p>Overview of student enrollment and records.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon teal">🎓</div><div class="stat-info"><h3>842</h3><p>Total Students</p></div></div>
+      <div class="stat-card"><div class="stat-icon blue">👦</div><div class="stat-info"><h3>423</h3><p>Male</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">👧</div><div class="stat-info"><h3>419</h3><p>Female</p></div></div>
+      <div class="stat-card"><div class="stat-icon purple">🏫</div><div class="stat-info"><h3>24</h3><p>Classes</p></div></div>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Class-wise Enrollment</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Class</th><th>Section</th><th>Students</th><th>Class Teacher</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Class 9</td><td>A</td><td>42</td><td>Mrs. Johnson</td><td><span class="status-badge badge-green">Active</span></td></tr>
+              <tr><td>Class 9</td><td>B</td><td>41</td><td>Mr. Patel</td><td><span class="status-badge badge-green">Active</span></td></tr>
+              <tr><td>Class 10</td><td>A</td><td>40</td><td>Ms. Williams</td><td><span class="status-badge badge-green">Active</span></td></tr>
+              <tr><td>Class 10</td><td>B</td><td>38</td><td>Mr. Brown</td><td><span class="status-badge badge-green">Active</span></td></tr>
+              <tr><td>Class 11</td><td>A</td><td>35</td><td>Dr. Smith</td><td><span class="status-badge badge-green">Active</span></td></tr>
+              <tr><td>Class 11</td><td>B</td><td>36</td><td>Mrs. Davis</td><td><span class="status-badge badge-orange">Review</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div class="panel" id="panel-announcements">
+    <div class="page-header">
+      <h1>📢 Announcements</h1>
+      <p>Post and manage school-wide announcements.</p>
+    </div>
+    <div class="content-card">
+      <div class="content-card-header"><h3>Post New Announcement</h3></div>
+      <div class="content-card-body">
+        <form id="annForm" onsubmit="postAnnouncement(event)">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="annTitle" placeholder="Announcement title" />
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea id="annBody" placeholder="Write your announcement here…"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Audience</label>
+              <select id="annAudience">
+                <option>All Staff &amp; Students</option>
+                <option>Teachers Only</option>
+                <option>Students Only</option>
+                <option>Parents Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select id="annPriority">
+                <option>Normal</option>
+                <option>Important</option>
+                <option>Urgent</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">📢 Post Announcement</button>
+          <div id="annMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header"><h3>Recent Announcements</h3></div>
+      <div class="content-card-body" id="annList">
+        <div class="announcement-item">
+          <h4>Annual Sports Day</h4>
+          <p>Annual Sports Day is scheduled for March 25th. All teachers must prepare their students for various events.</p>
+          <div class="ann-meta">👥 All Staff &amp; Students &nbsp;|&nbsp; 📅 March 10, 2026 &nbsp;|&nbsp; <span class="status-badge badge-blue">Normal</span></div>
+        </div>
+        <div class="announcement-item">
+          <h4>Board Meeting</h4>
+          <p>Monthly board meeting on March 15th at 2 PM in the conference hall.</p>
+          <div class="ann-meta">👥 Teachers Only &nbsp;|&nbsp; 📅 March 8, 2026 &nbsp;|&nbsp; <span class="status-badge badge-orange">Important</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="panel" id="panel-profile">
+    <div class="page-header">
+      <h1>👤 My Profile</h1>
+      <p>View and edit your profile information.</p>
+    </div>
+    <div class="content-card">
+      <div class="profile-top">
+        <div class="profile-avatar" id="profileAvatar">P</div>
+        <div class="profile-meta">
+          <h2 id="profileName">Principal Name</h2>
+          <p id="profileEmail">principal@school.edu</p>
+          <span class="badge">🏛️ Principal</span>
+        </div>
+      </div>
+
+      <!-- View Mode -->
+      <div class="content-card-body" id="profileViewMode">
+        <div class="info-grid">
+          <div class="info-item"><label>Full Name</label><p id="pName">–</p></div>
+          <div class="info-item"><label>Email</label><p id="pEmail">–</p></div>
+          <div class="info-item"><label>Phone</label><p id="pPhone">–</p></div>
+          <div class="info-item"><label>Experience</label><p id="pExp">–</p></div>
+          <div class="info-item"><label>Role</label><p>Principal</p></div>
+          <div class="info-item"><label>Member Since</label><p id="pDate">–</p></div>
+        </div>
+        <div style="margin-top:24px;">
+          <button class="btn btn-primary" onclick="toggleEditProfile()">✏️ Edit Profile</button>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div class="content-card-body" id="profileEditMode" style="display:none;">
+        <form id="editProfileForm" onsubmit="saveProfile(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="editName" placeholder="Your full name" />
+            </div>
+            <div class="form-group">
+              <label>Email (read-only)</label>
+              <input type="email" id="editEmail" disabled />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="editPhone" placeholder="Your phone number" />
+            </div>
+            <div class="form-group">
+              <label>Experience (years)</label>
+              <input type="number" id="editExp" placeholder="Years of experience" min="0" />
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleEditProfile()">Cancel</button>
+          </div>
+          <div id="profileMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="panel" id="panel-changePassword">
+    <div class="page-header">
+      <h1>🔒 Change Password</h1>
+      <p>Update your account password.</p>
+    </div>
+    <div class="content-card" style="max-width:480px;">
+      <div class="content-card-header"><h3>Update Password</h3></div>
+      <div class="content-card-body">
+        <form id="pwForm" onsubmit="changePassword(event)">
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="currPw" placeholder="Enter current password" />
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="newPw" placeholder="Min. 6 characters" />
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" id="confPw" placeholder="Re-enter new password" />
+          </div>
+          <button type="submit" class="btn btn-primary">🔐 Update Password</button>
+          <div id="pwMsg" class="msg"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  let currentUser = null;
+  (function () {
+    const u = localStorage.getItem('sms_current_user');
+    if (!u) { location.href = 'index.html'; return; }
+    currentUser = JSON.parse(u);
+    if (currentUser.role !== 'principal') { location.href = 'index.html'; }
+    initUI();
+  })();
+
+  function initUI() {
+    document.getElementById('topName').textContent   = currentUser.name.split(' ')[0];
+    document.getElementById('topAvatar').textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('welcomeMsg').textContent = 'Welcome back, ' + currentUser.name + '! 👋';
+    loadProfile();
+    loadTeachers();
+  }
+
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    const navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+    if (name === 'teachers') loadTeachers();
+  }
+
+  document.getElementById('userBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const dd = document.getElementById('dropdown');
+    dd.classList.toggle('open');
+    this.setAttribute('aria-expanded', dd.classList.contains('open'));
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  });
+  function closeDropdown() {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  }
+
+  function logout() {
+    localStorage.removeItem('sms_current_user');
+    location.href = 'index.html';
+  }
+
+  function loadTeachers() {
+    const users    = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const teachers = users.filter(u => u.role === 'teacher');
+    document.getElementById('totalTeachers').textContent = teachers.length;
+    document.getElementById('teacherCount').textContent  = teachers.length + ' teacher' + (teachers.length !== 1 ? 's' : '');
+    const tbody = document.getElementById('teacherTable');
+    if (teachers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:30px;">No teachers registered yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = teachers.map((t, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${t.name}</td>
+        <td>${t.email}</td>
+        <td>${t.subject || '–'}</td>
+        <td>${t.phone || '–'}</td>
+        <td><span class="status-badge ${t.active !== false ? 'badge-green' : 'badge-red'}">${t.active !== false ? 'Active' : 'Inactive'}</span></td>
+      </tr>`).join('');
+  }
+
+  function loadProfile() {
+    document.getElementById('profileName').textContent  = currentUser.name;
+    document.getElementById('profileEmail').textContent = currentUser.email;
+    document.getElementById('profileAvatar').textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('pName').textContent  = currentUser.name;
+    document.getElementById('pEmail').textContent = currentUser.email;
+    document.getElementById('pPhone').textContent = currentUser.phone      || '–';
+    document.getElementById('pExp').textContent   = currentUser.experience ? currentUser.experience + ' years' : '–';
+    document.getElementById('pDate').textContent  = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString() : '–';
+    document.getElementById('editName').value  = currentUser.name;
+    document.getElementById('editEmail').value = currentUser.email;
+    document.getElementById('editPhone').value = currentUser.phone      || '';
+    document.getElementById('editExp').value   = currentUser.experience || '';
+  }
+
+  function toggleEditProfile() {
+    const view = document.getElementById('profileViewMode');
+    const edit = document.getElementById('profileEditMode');
+    const isEdit = edit.style.display !== 'none';
+    view.style.display = isEdit ? 'block' : 'none';
+    edit.style.display = isEdit ? 'none'  : 'block';
+    document.getElementById('profileMsg').className = 'msg';
+  }
+
+  function saveProfile(e) {
+    e.preventDefault();
+    const msgEl = document.getElementById('profileMsg');
+    const name  = document.getElementById('editName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const exp   = document.getElementById('editExp').value.trim();
+    if (!name || !phone) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in required fields.'; return;
+    }
+    const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const idx   = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) {
+      users[idx].name = name; users[idx].phone = phone; users[idx].experience = exp;
+      localStorage.setItem('sms_users', JSON.stringify(users));
+      currentUser.name = name; currentUser.phone = phone; currentUser.experience = exp;
+      localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+    }
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Profile updated successfully.';
+    loadProfile();
+    setTimeout(toggleEditProfile, 1500);
+  }
+
+  function changePassword(e) {
+    e.preventDefault();
+    const msgEl  = document.getElementById('pwMsg');
+    const currPw = document.getElementById('currPw').value;
+    const newPw  = document.getElementById('newPw').value;
+    const confPw = document.getElementById('confPw').value;
+    msgEl.className = 'msg';
+    if (!currPw || !newPw || !confPw) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in all fields.'; return;
+    }
+    if (currPw !== currentUser.password) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Current password is incorrect.'; return;
+    }
+    if (newPw.length < 6) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'New password must be at least 6 characters.'; return;
+    }
+    if (newPw !== confPw) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'New passwords do not match.'; return;
+    }
+    const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const idx   = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) { users[idx].password = newPw; localStorage.setItem('sms_users', JSON.stringify(users)); }
+    currentUser.password = newPw;
+    localStorage.setItem('sms_current_user', JSON.stringify(currentUser));
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Password updated successfully.';
+    document.getElementById('pwForm').reset();
+  }
+
+  function postAnnouncement(e) {
+    e.preventDefault();
+    const msgEl    = document.getElementById('annMsg');
+    const title    = document.getElementById('annTitle').value.trim();
+    const body     = document.getElementById('annBody').value.trim();
+    const audience = document.getElementById('annAudience').value;
+    const priority = document.getElementById('annPriority').value;
+    if (!title || !body) {
+      msgEl.className = 'msg error'; msgEl.textContent = 'Please fill in title and message.'; return;
+    }
+    const priorityClass = priority === 'Urgent' ? 'badge-red' : priority === 'Important' ? 'badge-orange' : 'badge-blue';
+    const newAnn = `
+      <div class="announcement-item">
+        <h4>${title}</h4>
+        <p>${body}</p>
+        <div class="ann-meta">👥 ${audience} &nbsp;|&nbsp; 📅 ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} &nbsp;|&nbsp; <span class="status-badge ${priorityClass}">${priority}</span></div>
+      </div>`;
+    document.getElementById('annList').insertAdjacentHTML('afterbegin', newAnn);
+    msgEl.className = 'msg success'; msgEl.textContent = '✅ Announcement posted successfully.';
+    document.getElementById('annForm').reset();
+    setTimeout(() => { msgEl.className = 'msg'; }, 2000);
+  }
+</script>
+</body>
+</html>

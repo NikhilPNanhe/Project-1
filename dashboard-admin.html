@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – School Management Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1e293b;
+      --primary-light: #475569;
+      --accent-purple: #7c3aed;
+      --accent-light: #ede9fe;
+      --sidebar-w: 240px;
+      --topbar-h: 64px;
+    }
+
+    body { font-family: 'Poppins', sans-serif; background: #f1f5f9; color: #1f2937; }
+
+    /* Topbar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { font-size: 1.5rem; }
+    .topbar-title { color: #fff; font-size: 1.1rem; font-weight: 700; }
+    .topbar-subtitle { color: rgba(255,255,255,0.7); font-size: 0.78rem; }
+
+    .user-menu { position: relative; }
+    .user-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.15); border: none; border-radius: 30px;
+      padding: 8px 16px; cursor: pointer; color: #fff; font-family: inherit;
+      font-size: 0.9rem; font-weight: 500; transition: background 0.2s;
+    }
+    .user-btn:hover { background: rgba(255,255,255,0.25); }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--accent-purple); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem; font-weight: 700; color: #fff;
+    }
+    .dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0;
+      background: #fff; border-radius: 12px; min-width: 190px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18); overflow: hidden;
+      display: none; z-index: 200;
+    }
+    .dropdown.open { display: block; }
+    .dropdown a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px; text-decoration: none; color: #374151;
+      font-size: 0.88rem; font-weight: 500; transition: background 0.15s;
+    }
+    .dropdown a:hover { background: #f3f4f6; }
+    .dropdown a.logout { color: #dc2626; }
+    .dropdown hr { border: none; border-top: 1px solid #e5e7eb; }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+      width: var(--sidebar-w); background: #fff;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06); overflow-y: auto; z-index: 50;
+    }
+    .sidebar-section { padding: 20px 0 0; }
+    .sidebar-label {
+      padding: 6px 20px; font-size: 0.72rem; font-weight: 700;
+      color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; cursor: pointer; border: none; background: none;
+      font-family: inherit; font-size: 0.9rem; font-weight: 500;
+      color: #4b5563; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--accent-light); color: var(--accent-purple); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent-purple); border-left-color: var(--accent-purple); font-weight: 600; }
+    .nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+
+    /* Main */
+    .main {
+      margin-left: var(--sidebar-w); margin-top: var(--topbar-h);
+      padding: 32px; min-height: calc(100vh - var(--topbar-h));
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .page-header p  { color: #6b7280; font-size: 0.88rem; margin-top: 4px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 18px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 22px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon { font-size: 2rem; width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon.purple { background: var(--accent-light); }
+    .stat-icon.blue   { background: #dbeafe; }
+    .stat-icon.green  { background: #dcfce7; }
+    .stat-icon.orange { background: #ffedd5; }
+    .stat-info h3 { font-size: 1.5rem; font-weight: 700; color: #111827; }
+    .stat-info p  { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+
+    .content-card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 24px;
+    }
+    .content-card-header {
+      padding: 18px 24px; border-bottom: 1px solid #f3f4f6;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .content-card-header h3 { font-size: 1rem; font-weight: 700; color: #111827; }
+    .content-card-body { padding: 24px; }
+
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px 16px; text-align: left; font-size: 0.8rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; }
+    td { padding: 14px 16px; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-orange { background: #fef9c3; color: #b45309; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-purple { background: var(--accent-light); color: var(--accent-purple); }
+
+    .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.2s, transform 0.1s; border: none; white-space: nowrap; }
+    .btn:active { transform: scale(0.97); }
+    .btn-success { background: #dcfce7; color: #15803d; }
+    .btn-success:hover { background: #bbf7d0; }
+    .btn-danger  { background: #fee2e2; color: #b91c1c; }
+    .btn-danger:hover  { background: #fecaca; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; padding: 11px 24px; font-size: 0.9rem; border-radius: 10px; }
+    .btn-primary:hover { opacity: 0.9; }
+
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .info-box {
+      background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px;
+      padding: 16px 20px; margin-bottom: 20px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .info-box .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+    .info-box p { font-size: 0.88rem; color: #92400e; line-height: 1.5; }
+    .info-box strong { display: block; margin-bottom: 4px; color: #78350f; }
+
+    .msg { margin-top: 10px; font-size: 0.86rem; border-radius: 8px; padding: 10px 14px; display: none; }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px 16px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">🏫</div>
+    <div>
+      <div class="topbar-title">School Management Portal</div>
+      <div class="topbar-subtitle">Admin Control Panel</div>
+    </div>
+  </div>
+  <div class="user-menu">
+    <button class="user-btn" id="userBtn" aria-expanded="false" aria-haspopup="true">
+      <div class="user-avatar">⚙️</div>
+      <span>Administrator</span>
+      <span>▾</span>
+    </button>
+    <div class="dropdown" id="dropdown" role="menu">
+      <a href="#" onclick="showPanel('overview'); closeDropdown(); return false;" role="menuitem">🏠 Overview</a>
+      <hr />
+      <a href="#" class="logout" onclick="logout(); return false;" role="menuitem">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Admin Panel</div>
+    <button class="nav-item active" id="nav-overview" onclick="showPanel('overview')">
+      <span class="nav-icon">🏠</span> Overview
+    </button>
+    <button class="nav-item" id="nav-teachers" onclick="showPanel('teachers')">
+      <span class="nav-icon">👩‍🏫</span> Teacher Access
+    </button>
+    <button class="nav-item" id="nav-principals" onclick="showPanel('principals')">
+      <span class="nav-icon">🏛️</span> Principal Access
+    </button>
+    <button class="nav-item" id="nav-roles" onclick="showPanel('roles')">
+      <span class="nav-icon">🛡️</span> Role Management
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="panel active" id="panel-overview">
+    <div class="page-header">
+      <h1>⚙️ Admin Control Panel</h1>
+      <p>Manage system permissions, roles, and access control.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="icon">⚠️</div>
+      <p>
+        <strong>Admin Access Restriction</strong>
+        As Administrator, you can manage user roles and system permissions. You do <strong>not</strong> have access to student academic information (grades, marks, or academic records). This data is managed exclusively by Teachers and Principals.
+      </p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon purple">👥</div><div class="stat-info"><h3 id="statTotal">0</h3><p>Total Users</p></div></div>
+      <div class="stat-card"><div class="stat-icon blue">👩‍🏫</div><div class="stat-info"><h3 id="statTeachers">0</h3><p>Teachers</p></div></div>
+      <div class="stat-card"><div class="stat-icon green">🏛️</div><div class="stat-info"><h3 id="statPrincipals">0</h3><p>Principals</p></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🚫</div><div class="stat-info"><h3 id="statBlocked">0</h3><p>Blocked Users</p></div></div>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header"><h3>All Registered Users</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="allUsersTable">
+              <tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:30px;">No users registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="overviewMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER ACCESS -->
+  <div class="panel" id="panel-teachers">
+    <div class="page-header">
+      <h1>👩‍🏫 Teacher Access Management</h1>
+      <p>Grant or revoke access for teacher accounts.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="icon">ℹ️</div>
+      <p>
+        <strong>Teacher Permissions</strong>
+        Active teachers can: Upload homework, mark attendance, view class schedules, and track student performance. You can grant or deny login access here.
+      </p>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>Registered Teachers</h3>
+        <span id="teacherCountLabel" style="font-size:0.85rem;color:#6b7280;">0 teachers</span>
+      </div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Subject</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="teacherTable">
+              <tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:30px;">No teachers registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="teacherMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINCIPAL ACCESS -->
+  <div class="panel" id="panel-principals">
+    <div class="page-header">
+      <h1>🏛️ Principal Access Management</h1>
+      <p>Grant or revoke access for principal accounts.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="icon">ℹ️</div>
+      <p>
+        <strong>Principal Permissions</strong>
+        Active principals can: View school reports, manage teachers, view student records, and post announcements. You can grant or deny login access here.
+      </p>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header">
+        <h3>Registered Principals</h3>
+        <span id="principalCountLabel" style="font-size:0.85rem;color:#6b7280;">0 principals</span>
+      </div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Experience</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="principalTable">
+              <tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:30px;">No principals registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="principalMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLE MANAGEMENT -->
+  <div class="panel" id="panel-roles">
+    <div class="page-header">
+      <h1>🛡️ Role Management</h1>
+      <p>Overview of system roles and their permissions.</p>
+    </div>
+
+    <div class="info-box">
+      <div class="icon">🔒</div>
+      <p>
+        <strong>Access Restriction Notice</strong>
+        The Admin role cannot access student academic information. Grades, marks, exam results, and academic performance data are restricted to Teacher and Principal roles only.
+      </p>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header"><h3>System Roles &amp; Permissions</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Role</th><th>Register</th><th>Dashboard</th><th>Profile Mgmt</th><th>Student Academics</th><th>Access Control</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="status-badge badge-purple">⚙️ Admin</span></td>
+                <td>❌</td>
+                <td>✅ Admin Panel</td>
+                <td>–</td>
+                <td><span class="status-badge badge-red">No Access</span></td>
+                <td><span class="status-badge badge-green">Full Control</span></td>
+              </tr>
+              <tr>
+                <td><span class="status-badge badge-blue">📚 Teacher</span></td>
+                <td>✅ Self-Register</td>
+                <td>✅ Teacher Dashboard</td>
+                <td>✅ Edit Profile &amp; Password</td>
+                <td><span class="status-badge badge-green">Full Access</span></td>
+                <td><span class="status-badge badge-red">No Access</span></td>
+              </tr>
+              <tr>
+                <td><span class="status-badge badge-green">🏛️ Principal</span></td>
+                <td>✅ Self-Register</td>
+                <td>✅ Principal Dashboard</td>
+                <td>✅ Edit Profile &amp; Password</td>
+                <td><span class="status-badge badge-green">Full Access</span></td>
+                <td><span class="status-badge badge-red">No Access</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="content-card-header"><h3>Feature Matrix</h3></div>
+      <div class="content-card-body">
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Feature</th><th>Admin</th><th>Teacher</th><th>Principal</th></tr></thead>
+            <tbody>
+              <tr><td>Upload Homework</td><td>❌</td><td>✅</td><td>❌</td></tr>
+              <tr><td>Mark Attendance</td><td>❌</td><td>✅</td><td>❌</td></tr>
+              <tr><td>View Class Schedule</td><td>❌</td><td>✅</td><td>❌</td></tr>
+              <tr><td>Student Performance</td><td>❌</td><td>✅</td><td>✅</td></tr>
+              <tr><td>School Reports</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>Teacher Management</td><td>✅ (Access)</td><td>❌</td><td>✅ (View)</td></tr>
+              <tr><td>Student Records</td><td>❌</td><td>❌</td><td>✅ (View)</td></tr>
+              <tr><td>Post Announcements</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              <tr><td>Grant/Deny Access</td><td>✅</td><td>❌</td><td>❌</td></tr>
+              <tr><td>Student Academics</td><td><span class="status-badge badge-red">DENIED</span></td><td>✅</td><td>✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  // Auth guard
+  (function () {
+    const u = localStorage.getItem('sms_current_user');
+    if (!u) { location.href = 'index.html'; return; }
+    const user = JSON.parse(u);
+    if (user.role !== 'admin') { location.href = 'index.html'; }
+    loadAllData();
+  })();
+
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    const navEl = document.getElementById('nav-' + name);
+    if (navEl) navEl.classList.add('active');
+    loadAllData();
+  }
+
+  document.getElementById('userBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    const dd = document.getElementById('dropdown');
+    dd.classList.toggle('open');
+    this.setAttribute('aria-expanded', dd.classList.contains('open'));
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  });
+  function closeDropdown() {
+    document.getElementById('dropdown').classList.remove('open');
+    document.getElementById('userBtn').setAttribute('aria-expanded', 'false');
+  }
+
+  function logout() {
+    localStorage.removeItem('sms_current_user');
+    location.href = 'index.html';
+  }
+
+  function loadAllData() {
+    const users      = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const teachers   = users.filter(u => u.role === 'teacher');
+    const principals = users.filter(u => u.role === 'principal');
+    const blocked    = users.filter(u => u.active === false);
+
+    // Stats
+    document.getElementById('statTotal').textContent      = users.length;
+    document.getElementById('statTeachers').textContent   = teachers.length;
+    document.getElementById('statPrincipals').textContent = principals.length;
+    document.getElementById('statBlocked').textContent    = blocked.length;
+
+    // All users table
+    const allTbody = document.getElementById('allUsersTable');
+    if (users.length === 0) {
+      allTbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:30px;">No users registered yet.</td></tr>';
+    } else {
+      allTbody.innerHTML = users.map((u, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td><span class="status-badge ${u.role === 'teacher' ? 'badge-blue' : 'badge-green'}">${u.role === 'teacher' ? '📚 Teacher' : '🏛️ Principal'}</span></td>
+          <td><span class="status-badge ${u.active !== false ? 'badge-green' : 'badge-red'}">${u.active !== false ? 'Active' : 'Blocked'}</span></td>
+          <td>
+            <div class="btn-group">
+              ${u.active !== false
+                ? `<button class="btn btn-danger" onclick="toggleAccess('${u.id}', false)">🚫 Deny Access</button>`
+                : `<button class="btn btn-success" onclick="toggleAccess('${u.id}', true)">✅ Grant Access</button>`}
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    // Teachers table
+    document.getElementById('teacherCountLabel').textContent = teachers.length + ' teacher' + (teachers.length !== 1 ? 's' : '');
+    const tTbody = document.getElementById('teacherTable');
+    if (teachers.length === 0) {
+      tTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:30px;">No teachers registered yet.</td></tr>';
+    } else {
+      tTbody.innerHTML = teachers.map((t, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${t.name}</td>
+          <td>${t.email}</td>
+          <td>${t.subject || '–'}</td>
+          <td>${t.phone || '–'}</td>
+          <td><span class="status-badge ${t.active !== false ? 'badge-green' : 'badge-red'}">${t.active !== false ? 'Active' : 'Blocked'}</span></td>
+          <td>
+            <div class="btn-group">
+              ${t.active !== false
+                ? `<button class="btn btn-danger" onclick="toggleAccess('${t.id}', false, 'teacher')">🚫 Deny Access</button>`
+                : `<button class="btn btn-success" onclick="toggleAccess('${t.id}', true, 'teacher')">✅ Grant Access</button>`}
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+
+    // Principals table
+    document.getElementById('principalCountLabel').textContent = principals.length + ' principal' + (principals.length !== 1 ? 's' : '');
+    const pTbody = document.getElementById('principalTable');
+    if (principals.length === 0) {
+      pTbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:30px;">No principals registered yet.</td></tr>';
+    } else {
+      pTbody.innerHTML = principals.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${p.name}</td>
+          <td>${p.email}</td>
+          <td>${p.experience ? p.experience + ' yrs' : '–'}</td>
+          <td>${p.phone || '–'}</td>
+          <td><span class="status-badge ${p.active !== false ? 'badge-green' : 'badge-red'}">${p.active !== false ? 'Active' : 'Blocked'}</span></td>
+          <td>
+            <div class="btn-group">
+              ${p.active !== false
+                ? `<button class="btn btn-danger" onclick="toggleAccess('${p.id}', false, 'principal')">🚫 Deny Access</button>`
+                : `<button class="btn btn-success" onclick="toggleAccess('${p.id}', true, 'principal')">✅ Grant Access</button>`}
+            </div>
+          </td>
+        </tr>`).join('');
+    }
+  }
+
+  function toggleAccess(id, grant, source) {
+    const users = JSON.parse(localStorage.getItem('sms_users') || '[]');
+    const idx   = users.findIndex(u => u.id === id);
+    if (idx === -1) return;
+    users[idx].active = grant;
+    localStorage.setItem('sms_users', JSON.stringify(users));
+
+    const msgIds = { teacher: 'teacherMsg', principal: 'principalMsg' };
+    const msgId  = msgIds[source] || 'overviewMsg';
+    const msgEl  = document.getElementById(msgId);
+    if (msgEl) {
+      msgEl.className = 'msg success';
+      msgEl.textContent = `✅ Access ${grant ? 'granted' : 'denied'} for ${users[idx].name}.`;
+      setTimeout(() => { msgEl.className = 'msg'; }, 3000);
+    }
+    loadAllData();
+  }
+</script>
+</body>
+</html>
